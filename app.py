@@ -11,6 +11,7 @@ from htmlTemplates import css, bot_template, user_template
 from langchain.llms import HuggingFaceHub
 from transformers import BertModel, BertTokenizer
 import altair as alt
+import torch
 
 OPENAI_API_KEY = "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"
 #OPENAI_API_KEY = "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"
@@ -34,13 +35,19 @@ def get_text_chunks(text):
     chunks = text_splitter.split_text(text)
     return chunks
 
-def get_vectorstore(text_chunks):
-    embeddings = OpenAIEmbeddings('bert-base-uncased')
-    tokenizer= BertTokenizer.from_pretrained('bert-base-uncased')
-    tokens= tokenizer.tokenize(str(text_chunks))
+def get_vectorstore(preprocessed_text):
+    #embeddings = OpenAIEmbeddings('bert-base-uncased')
+    model_name = "bert-base-uncased"
+    tokenizer= BertTokenizer.from_pretrained(model_name)
+    model = BertModel.from_pretrained(model_name)
     #embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
-    vectorstore = BertModel.from_texts(texts=text_chunks, embedding=embeddings)
-    return vectorstore 
+    tokens = tokenizer(preprocessed_text, padding=True, truncation=True, return_tensors='pt')
+
+    with torch.no_grad():
+        outputs = model(**tokens)
+        embeddings = outputs.last_hidden_state
+
+    return embeddings
 
 
 def get_conversation_chain(vectorstore):
@@ -69,6 +76,17 @@ def handle_userinput(user_question):
         else:
             st.write(bot_template.replace(
                 "{{MSG}}", message.content), unsafe_allow_html=True)
+
+
+def preprocess_text(text):
+    # Convert text to lowercase
+    text = text.lower()
+    
+    # Tokenize the text (example using whitespace tokenization)
+    tokens = text.split()
+    
+    # Return the preprocessed tokens as a list or a formatted string
+    return tokens
 
 
 def main():
@@ -117,16 +135,16 @@ def main():
                 raw_text = get_pdf_text(pdf_docs)
 
                 # get the text chunks
-                text_chunks = get_text_chunks(raw_text)
+                #text_chunks = get_text_chunks(raw_text)
+                preprocessed_text = preprocess_text(raw_text)
 
                 # create vector store
-                vectorstore = get_vectorstore(text_chunks)
+                embeddings = get_vectorstore(preprocessed_text)
 
+                print(embeddings)
                 # create conversation chain
-                st.session_state.conversation = get_conversation_chain(
-                    vectorstore)
+                #st.session_state.conversation = get_conversation_chain(vectorstore)
 
 
 if __name__ == '__main__':
     main()
-
