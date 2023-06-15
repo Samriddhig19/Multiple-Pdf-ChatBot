@@ -1,13 +1,18 @@
 css = '''
 <style>
-.chat-message {
-    padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem; display: flex
-}
+
 .chat-message.user {
-    background-color: #2b313e
+    border: 1px solid black;
+    margin-left: 20rem;
+    background-color: #89CFF0;
+    overflow: scroll;
+
 }
 .chat-message.bot {
-    background-color: #475063
+    border: 1px solid black;
+    margin-right: 20rem;
+    background-color: #B9D9EB;
+    overflow: scroll;
 }
 .chat-message .avatar {
   width: 20%;
@@ -18,17 +23,23 @@ css = '''
   border-radius: 50%;
   object-fit: cover;
 }
+.chat-message {
+    padding: 1.5rem; border-radius: 0.5rem; margin-top: 1rem; display: flex
+}
 .chat-message .message {
   width: 80%;
   padding: 0 1.5rem;
-  color: #fff;
+  color:#000000;
 }
+
+
 '''
+
 
 bot_template = '''
 <div class="chat-message bot">
     <div class="avatar">
-        <img src="https://i.ibb.co/cN0nmSj/Screenshot-2023-05-28-at-02-37-21.png" style="max-height: 78px; max-width: 78px; border-radius: 50%; object-fit: cover;">
+        <img src="https://cdn.vectorstock.com/i/1000x1000/74/57/ai-robot-flat-color-icon-vector-29147457.webp" style="max-height: 78px; max-width: 78px; border-radius: 50%; object-fit: cover;">
     </div>
     <div class="message">{{MSG}}</div>
 </div>
@@ -37,8 +48,18 @@ bot_template = '''
 user_template = '''
 <div class="chat-message user">
     <div class="avatar">
-        <img src="https://i.ibb.co/rdZC7LZ/Photo-logo-1.png">
+        <img src="https://thumbs.dreamstime.com/z/businessman-profile-icon-male-portrait-flat-design-vector-illustration-47075259.jpg">
     </div>    
     <div class="message">{{MSG}}</div>
 </div>
 '''
+
+
+
+
+
+
+
+
+
+

@@ -9,15 +9,13 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from htmlTemplates import css, bot_template, user_template
 from langchain.llms import HuggingFaceHub
+from transformers import BertModel, BertTokenizer
 import altair as alt
 
 
-
-
-
-#OPENAI_API_KEY = "sk-9KdnuQIbNV3rF3h3yCFghfgjdgfrr5T3BlbkFJ3Q4J1N0neSFcnpCpNBea"
-
-
+OPENAI_API_KEY = ""
+#OPENAI_API_KEY = ""
+HUGGINGFACEHUB_API_TOKEN = ""
 
 def get_pdf_text(pdf_docs):
     text = ""
@@ -30,23 +28,25 @@ def get_pdf_text(pdf_docs):
 def get_text_chunks(text):
     text_splitter = CharacterTextSplitter(
         separator="\n",
-        chunk_size=1000,
-        chunk_overlap=200,
-        length_function=len
+        chunk_size=500,
+        chunk_overlap=100,
+        length_function=len   
     )
     chunks = text_splitter.split_text(text)
     return chunks
 
 def get_vectorstore(text_chunks):
-    #embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
-    embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
-    vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
+    embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+    tokenizer= BertTokenizer.from_pretrained('bert-base-uncased')
+    tokens= tokenizer.tokenize(str(text_chunks))
+    #embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+    vectorstore = BertModel.from_texts(texts=text_chunks, embedding=embeddings)
     return vectorstore 
 
 
 def get_conversation_chain(vectorstore):
     llm = ChatOpenAI(openai_api_key = OPENAI_API_KEY)
-    # llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature":0.5, "max_length":512})
+    #llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature":0.5, "max_length":256},huggingfacehub_api_token="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")
 
     memory = ConversationBufferMemory(
         memory_key='chat_history', return_messages=True)
@@ -74,16 +74,36 @@ def handle_userinput(user_question):
 
 def main():
     load_dotenv()
-    st.set_page_config(page_title="Chat with multiple PDFs",
+    st.set_page_config(page_title="Trade Chat",
                        page_icon=":books:")
     st.write(css, unsafe_allow_html=True)
+
+    hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            </style>
+            """
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+    styl = f"""
+    <style>
+        .stTextInput {{
+        position: fixed;
+        bottom: 3rem;
+    }}
+    </style>
+    """
+
+    st.markdown(styl, unsafe_allow_html=True)
+    
 
     if "conversation" not in st.session_state:
         st.session_state.conversation = None
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = None
 
-    st.header("Chat with multiple PDFs :books:")
+    st.header("Trade Chat :books:")
     user_question = st.text_input("Ask a question about your documents:")
     if user_question:
         handle_userinput(user_question)
