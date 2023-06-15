@@ -12,10 +12,9 @@ from langchain.llms import HuggingFaceHub
 from transformers import BertModel, BertTokenizer
 import altair as alt
 
-
-OPENAI_API_KEY = ""
-#OPENAI_API_KEY = ""
-HUGGINGFACEHUB_API_TOKEN = ""
+OPENAI_API_KEY = "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"
+#OPENAI_API_KEY = "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"
+HUGGINGFACEHUB_API_TOKEN = "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" 
 
 def get_pdf_text(pdf_docs):
     text = ""
@@ -36,7 +35,7 @@ def get_text_chunks(text):
     return chunks
 
 def get_vectorstore(text_chunks):
-    embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+    embeddings = OpenAIEmbeddings('bert-base-uncased')
     tokenizer= BertTokenizer.from_pretrained('bert-base-uncased')
     tokens= tokenizer.tokenize(str(text_chunks))
     #embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
